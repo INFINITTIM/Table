@@ -28,16 +28,6 @@ public:
 	Record<TKey, TVal> getCurr() const override { return pRec[curr_element]; }
 	TKey getCurrKey() const override { return pRec[curr_element].key; }
 	TVal getCurrVal() const override { return pRec[curr_element].val; }
-
-	// оператор вывода
-	friend std::ostream& operator<<(std::ostream& out, const ArrayTable m)
-	{
-		for (m.Reset(); !m.IsEnd(); m.GoNext())
-		{
-			os << m.getCurr() << std::endl;
-		}
-		return os;
-	}
 };
 
 // реализация конструкторов и деструктора
@@ -47,9 +37,6 @@ ArrayTable<TKey, TVal>::ArrayTable(int _size = 10) : Table<TKey, TVal>()
 	size = _size;
 	curr_element = -1;
 	pRec = new Record<TKey, TVal>[size];
-	for (int i = 0; i < size; i++) {
-		pRec[i].status = Empty;
-	}
 }
 
 template<typename TKey, typename TVal>

@@ -6,9 +6,9 @@
 
 enum Balansir
 {
-	LEFTUNBALANC,
-	NOUNBALANC,
-	RIGHTUNBALANC
+	LEFTUNBALANC = -1,
+	NOUNBALANC = 0 ,
+	RIGHTUNBALANC = 1
 };
 
 
@@ -22,7 +22,7 @@ struct TTreeNode
 	Record<TKey, TVal> rec; // запись в одном звене дерева
 	TTreeNode* pLeft; // указатель на левого потомка
 	TTreeNode* pRight; // указатель на правого потомка
-	Balansir balansir; // проверка сбалансированности
+	Balansir balansir = Balansir::NOUNBALANC; // проверка сбалансированности
 };
 
 template <typename TKey, typename TVal>
@@ -43,7 +43,7 @@ public:
 
 	bool Find(TKey key) override;
 	bool Insert(Record<TKey, TVal> rec) override;
-	bool Delete(TKey key) override;
+	void Delete(TKey key) override;
 
 	void Reset() override;
 	void GoNext() override;
@@ -106,10 +106,10 @@ bool TreeTable<TKey, TVal>::Find(TKey key)
 		if (pCurr->rec.key == key)
 			return true;
 		pPrev = pCurr;
-		if (key > pCurr->rec.key) 
-			pCurr = pCurr->pRight; 
+		if (key < pCurr->rec.key) // Исправлено условие
+			pCurr = pCurr->pLeft; // Двигаемся влево, если искомый ключ меньше
 		else
-			pCurr = pCurr->pLeft;
+			pCurr = pCurr->pRight; // Иначе вправо
 	}
 	pCurr = pPrev;
 	return false;
@@ -126,21 +126,20 @@ bool TreeTable<TKey, TVal>::Insert(Record<TKey, TVal> rec) // функция вставки эл
 	Eff++; // увеличиваем эффективность
 	if (pCurr == nullptr) // если дерево пустое то
 		pRoot = new_element; // новый элемент становится корнем
-	else if(rec.key < pCurr->rec.key)
+	else // иначе если дерево не пустое
 	{
-		pCurr->pLeft = new_element;
-	}
-	else
-	{
-		pCurr->pRight = new_element;
+		if (rec.key < pCurr->rec.key) 
+			pCurr->pLeft = new_element;
+		if (rec.key > pCurr->rec.key)
+			pCurr->pRight = new_element;
 	}
 	return true;
 }
 
 template<class TKey, class TVal>
-bool TreeTable<TKey, TVal>::Delete(TKey key) {
+void TreeTable<TKey, TVal>::Delete(TKey key) {
 	if (!Find(key)) {
-		return false;
+		throw -1;
 	}
 	TTreeNode<TKey, TVal>* nodeToDelete = pCurr;
 	//Один потомок слева
@@ -211,7 +210,6 @@ bool TreeTable<TKey, TVal>::Delete(TKey key) {
 	}
 	delete nodeToDelete;
 	DataCount--;
-	return true;
 }
 
 template <typename TKey, typename TVal>

@@ -28,7 +28,7 @@ public:
 	// методы для работы с таблицами
 	virtual bool Find(TKey key) = 0;
 	virtual bool Insert(Record<TKey, TVal> rec) = 0;
-	virtual bool Delete(TKey key) = 0;
+	virtual void Delete(TKey key) = 0;
 
 	// методы для итерирования
 	virtual void Reset() = 0;

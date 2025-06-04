@@ -3,20 +3,20 @@
 #include "Record.h"
 #include "Table.h"
 #include "HashTable.h"
-#include "List.h"
-#include "iterator.h"
+#include<list>
+#include<iterator>
 
 template <typename TKey, typename TVal>
 class HashTableUsedList : public HashTable<TKey, TVal>
 {
 protected:
-	List<Record<TKey, TVal>>* pList;
+	std::list<Record<TKey, TVal>>* pList;
 	int curr_list;
-	typename List<Record<TKey, TVal>>::iterator curr_iterator;
+	typename std::list<Record<TKey, TVal>>::iterator currI;
 public:
 	HashTableUsedList(int _size = 100) : HashTable<TKey, TVal>(_size)
 	{
-		pList = new List<Record<TKey, TVal>>[_size];
+		pList = new std::list<Record<TKey, TVal>>[_size];
 		curr_list = -1;
 	}
 
@@ -27,52 +27,58 @@ public:
 
 	bool Find(TKey _key) override {
 		curr_list = HashFunction(_key);
-		Eff++; // Учет обращения к цепочке
-		if (pList[curr_list].IsEmpty()) {
-			return false;
+		Eff++;
+		bool res = false;
+		for (currI = pList[curr_list].begin(); currI != pList[curr_list].end(); currI++) {
+			Eff++;
+			if (currI->key == _key)
+			{
+				res = true;
+				break;
+			}
 		}
-		for (curr_iterator = pList[curr_list].begin(); curr_iterator != pList[curr_list].end(); ++curr_iterator) {
-			Eff++; // Учет проверки элемента
-			if ((*curr_iterator).key == _key) return true;
-		}
-		return false;
+		return res;
 	}
 
 	bool Insert(Record<TKey, TVal> rec) override {
+		if (IsFull())
+			return false;
 		if (Find(rec.key)) {
 			return false;
 		}
-		pList[curr_list].InsFirst(rec); // вставка в начало
+		pList[curr_list].push_front(rec); // вставка в начало
 		DataCount++;
 		Eff++;
 		return true;
 	}
 
-	bool Delete(TKey _key) override {
-		if (!Find(_key)) 
-			return false;
-		pList[curr_list].DelCurr(); // удаление текущего
-		DataCount--;
-		Eff++;
-		return true;
+	void Delete(TKey _key) override {
+		if (Find(_key))
+		{
+			pList[curr_list].erase(currI); // удаление текущего
+			DataCount--;
+			Eff++;
+		}
+		else
+			return;
 	}
 
 	void Reset() override {
-		curr_list = 0;
-		while (curr_list < size && pList[curr_list].IsEmpty()) {
-			curr_list++;
+		for (curr_list = 0; curr_list < size; curr_list++) {
+			if (!pList[curr_list].empty()) {
+				currI = pList[curr_list].begin();
+				return;
+			}
 		}
-		if (curr_list < size) {
-			curr_iterator = pList[curr_list].begin();
-		}
+		curr_list = size;
 	}
 
 	void GoNext() override {
-		++curr_iterator;
-		while (curr_list < size && curr_iterator == pList[curr_list].end()) {
-			curr_list++;
+		++currI;
+		while (curr_list < size && currI == pList[curr_list].end()) {
+			++curr_list;
 			if (curr_list < size) {
-				curr_iterator = pList[curr_list].begin();
+				currI = pList[curr_list].begin();
 			}
 		}
 	}
@@ -82,28 +88,21 @@ public:
 	}
 
 	TKey getCurrKey() const override {
-		return (*curr_iterator).key;
+		return (*currI).key;
 	}
 
 	TVal getCurrVal() const override {
-		return (*curr_iterator).val;
+		return (*currI).val;
 	}
 
 	Record<TKey, TVal> getCurr() const override {
-		return *curr_iterator;
+		return *currI;
 	}
 
 
 	//isFull функция будет повторять функцию проверки на полноту - попробовать выделить элемент, если его нет, то false
 	bool IsFull() const override {
-		try {
-			pList[0].InsFirst(Record<TKey, TVal>());
-			pList[0].DelFirst();
-			return false;
-		}
-		catch (...) {
-			return true;
-		}
+		return false;
 	}
 
 	//класс представляет собой массив списков (может быть упорядоченным по ключу в порядке возрастания или убывания

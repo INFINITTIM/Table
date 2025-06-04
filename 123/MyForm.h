@@ -68,6 +68,7 @@ namespace CppWinForm1 {
 	private: System::Windows::Forms::TextBox^ textBox1;
 	private: System::Windows::Forms::Label^ label10;
 
+
 		   Program* program;
 
 #pragma region Windows Form Designer generated code
@@ -332,7 +333,6 @@ namespace CppWinForm1 {
 			   this->comboBox1->Name = L"comboBox1";
 			   this->comboBox1->Size = System::Drawing::Size(286, 46);
 			   this->comboBox1->TabIndex = 21;
-			   this->comboBox1->SelectedIndex = 0;
 			   // 
 			   // button5
 			   // 
@@ -438,6 +438,7 @@ namespace CppWinForm1 {
 			   label7->Text = gcnew String("Эффективность: " + eff.ToString());
 			   label9->Text = gcnew String("Кол-во эл-ов: " + dc.ToString());
 		   }
+
 		   void DisplayRecordsInGrid()
 		   {
 			   // Убираем выделение строк
@@ -585,6 +586,8 @@ private: System::Void button5_Click(System::Object^ sender, System::EventArgs^ e
 
 			// Прокручиваем DataGridView к выбранной строке
 			dataGridView1->FirstDisplayedScrollingRowIndex = index;
+			DisplayRecordsInGrid();
+			UpdateLabel7();
 		}
 		else {
 			MessageBox::Show("Элемент с таким ключом не найден");

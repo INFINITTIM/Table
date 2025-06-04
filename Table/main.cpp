@@ -13,6 +13,8 @@
 #include "HashTableUsedList.h"
 #include "Tree.h"
 #include "TreeBalance.h"
+#include "GC.h"
+
 
 class Program
 {
@@ -56,25 +58,29 @@ public:
     void CreateTable(int i, int size)
     {
         tableCreated = true;
-        if (i == 0)
-        {
+        if (i == 0) {
             table = new ScanTable<int, int>(size);
             type = 0;
         }
-        if (i == 1)
-        {
+        else if (i == 1) {
             table = new SortTable<int, int>(size);
             type = 1;
         }
-        if (i == 2)
-        {
-            table = new HashTableUsedArray<int, int>(size, 2);
+        else if (i == 2) {
+            table = new HashTableUsedArray<int, int>(size, 3);
             type = 2;
         }
-        if (i == 3)
-        {
+        else if (i == 3) {
             table = new HashTableUsedList<int, int>(size);
             type = 3;
+        }
+        else if (i == 4) {  // Дерево
+            table = new TreeTable<int, int>();
+            type = 4;
+        }
+        else if (i == 5) {  // Сбалансированное дерево
+            table = new TreeBalance<int, int>();
+            type = 5;
         }
     }
     void Insert(int i, int j)
@@ -157,45 +163,56 @@ public:
     }
 };
 
+TMem TTNode::mem;
 
-int main()
-{
+int main() {
     setlocale(LC_ALL, "Russian");
 
+    TTNode::InitMem();
 
-    //Program* m = new Program;
-    //m->CreateTable(0, 100);
-    //m->Insert(3, 5);
-    //m->Insert(9, 5);
-    //m->Insert(1, 5);
-    //m->FillRandom(10, 1000);
-    //std::cout << *m;
+    TreeUnballansirBinFindNewVersion tree;
 
-    TreeBalance<int, int>* ttable = new TreeBalance<int, int>();
+    tree.InsertElement(50);
+    tree.InsertElement(30);
+    tree.InsertElement(70);
+    tree.InsertElement(20);
+    tree.InsertElement(40);
+    tree.InsertElement(60);
+    tree.InsertElement(80);
+    tree.InsertElement(10);
+    tree.InsertElement(25);
+    tree.InsertElement(35);
+    tree.InsertElement(45);
+    tree.InsertElement(55);
+    tree.InsertElement(65);
+    tree.InsertElement(75);
+    tree.InsertElement(90);
 
-    ttable->Insert(Record<int, int>{5, 4});
-    ttable->Insert(Record<int, int>{10, 4});
-    ttable->Insert(Record<int, int>{2, 4});
-    ttable->Insert(Record<int, int>{4, 4});
-    ttable->Insert(Record<int, int>{7, 4});
-    ttable->Insert(Record<int, int>{8, 4});
-    ttable->Insert(Record<int, int>{9, 4});
-    //ttable->Delete(5);
-    //ttable->Delete(7);
-    ttable->Insert(Record<int, int>{6, 4});
-    ttable->Insert(Record<int, int>{12, 4});
-    ttable->Insert(Record<int, int>{11, 4});
+    std::cout << "Начальная структура дерева:\n";
+    tree.Print(std::cout);
+    std::cout << "\nОбход:\n";
+    tree.PrintIterator(std::cout);
 
-    ttable->Delete(8);
-    ttable->Delete(9);
-    ttable->Delete(10);
-    /*for (int i = 1; i <= 100; i++)
-    {
-        ttable->Insert(Record<int, int>{i, 4});
-    }*/
-    //ttable->Insert(Record<int, int>{2, 5});
-    std::cout << *ttable;
+    TTNode::PrintFree();
 
-    return 0;
+    std::cout << "\nУдаление узла 30\n";
+    tree.DeleteElement(30);
+    std::cout << "\nОбновлённая структура дерева:\n";
+    tree.Print(std::cout);
+    std::cout << "\nОбход:\n";
+    tree.PrintIterator(std::cout);
+
+    TTNode::PrintFree();
+    std::cout << "\nОчистка памяти\n\n";
+    TTNode::ClearMem(&tree);
+    TTNode::PrintFree();
+
+    std::cout << "\nВставка нового значения 85\n\n";
+    tree.InsertElement(85);
+    TTNode::PrintFree();
+
+    std::cout << "\nФинальная структура дерева:\n";
+    tree.Print(std::cout);
+    std::cout << "\nФинальный обход:\n";
+    tree.PrintIterator(std::cout);
 }
-

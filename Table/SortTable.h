@@ -35,7 +35,7 @@ public:
 	};
 	bool Find(TKey key) override;
 	bool Insert(Record<TKey, TVal> rec) override;
-	bool Delete(TKey key) override;
+	void Delete(TKey key) override;
 
 	// сортировка выбором
 	void SelectSort();
@@ -91,9 +91,9 @@ bool SortTable<TKey, TVal>::Insert(Record<TKey, TVal> rec) {
 }
 
 template <typename TKey, typename TVal>
-bool SortTable<TKey, TVal>::Delete(TKey key) {
+void SortTable<TKey, TVal>::Delete(TKey key) {
 	if (!Find(key)) {
-		return false;
+		throw - 1;
 	}
 	else {
 		for (int i = curr_element; i < DataCount - 1; i++) {
@@ -101,7 +101,6 @@ bool SortTable<TKey, TVal>::Delete(TKey key) {
 			Eff++;
 		}
 		DataCount--;
-		return true;
 	}
 }
 

@@ -14,24 +14,7 @@ public:
 	// методы для работы с таблицами
 	bool Find(TKey key) override;
 	bool Insert(Record<TKey, TVal> rec) override;
-	bool Delete(TKey key) override ;
-
-	// оператор вывода
-	friend std::ostream& operator<<(std::ostream& out, ScanTable& m)
-	{
-		m.Reset();
-		for (int i = 0; i < size; i++)
-		{
-			if (m.getCurrKey() == i)
-			{
-				os << m.getCurr() << std::endl;
-				m.GoNext();
-			}
-			else
-				os << "Key: ---- , Value : ---- " << std::endl;
-		}
-		return os;
-	}
+	void Delete(TKey key) override;
 };
 
 // реализация функции поиска данных в таблице по ключу
@@ -68,12 +51,11 @@ bool ScanTable<TKey, TVal>::Insert(Record<TKey, TVal> record)
 
 // реализация функции удаления данных из таблицы по ключу
 template<typename TKey, typename TVal>
-bool ScanTable<TKey, TVal>::Delete(TKey key)
+void ScanTable<TKey, TVal>::Delete(TKey key)
 {
 	if (!Find(key))
 		throw - 1;
 	DataCount--;
 	pRec[curr_element] = pRec[DataCount];
 	Eff++;
-	return true;
 }

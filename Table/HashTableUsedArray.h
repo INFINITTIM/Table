@@ -28,29 +28,13 @@ public:
 		}
 	}
 
-	bool IsEnd() override
-	{
-		return current_element == size;
-	}
+	bool IsEnd() override { return current_element == size; }
 
-	Record<TKey, TVal> getCurr() const override
-	{
-		return pRec[current_element];
-	}
+	Record<TKey, TVal> getCurr() const override { return pRec[current_element]; }
+	TKey getCurrKey() const override { return pRec[current_element].key; }
+	TVal getCurrVal() const override { return pRec[current_element].val; }
 
-	TKey getCurrKey() const override
-	{
-		return pRec[current_element].key;
-	}
-	TVal getCurrVal() const override
-	{
-		return pRec[current_element].val;
-	}
-
-	bool IsFull() const override
-	{
-		return (DataCount >= size);
-	}
+	bool IsFull() const override { return DataCount == size; }
 
 	void GoNext() override 
 	{
@@ -71,10 +55,16 @@ public:
 			Eff++;
 			if (pRec[current_element] == free)
 				break;
-			else if (pRec[current_element] == deleted && tmp == -1)
-				tmp = current_element;
-			else if (pRec[current_element].key == key)
-				return true;
+			else
+			{
+				if (pRec[current_element] == deleted && tmp == -1)
+					tmp = current_element;
+				else
+				{
+					if (pRec[current_element].key == key)
+						return true;
+				}
+			}
 			current_element = (current_element + step) % size;
 		}
 		if (tmp != -1)
@@ -94,15 +84,13 @@ public:
 		return true;
 	}
 	
-	bool Delete(TKey key) override
+	void Delete(TKey key) override
 	{
-		bool res = Find(key);
-		if (!(res))
-			return false;
+		if (!Find(key))
+			throw - 1;
 		pRec[current_element] = deleted;
 		DataCount--;
 		Eff++;
-		return true;
 	}
 };
 
@@ -112,6 +100,9 @@ HashTableUsedArray<TKey, TVal>::HashTableUsedArray(int _size, int _step)
 {
 	free.key = -1;
 	deleted.key = -2;
+	free.val = 0;
+	deleted.val = 0;
+	current_element = -1;
 	size = _size;
 	step = _step;
 	pRec = new Record<TKey, TVal>[size];
