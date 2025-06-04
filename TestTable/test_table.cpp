@@ -205,13 +205,13 @@ TEST(SortTableTest, DeleteMiddle) {
 }
 
 // =============================================
-// Тесты для класса HashTableUsedArray
+// Тесты для HashTableUsedArray (открытая адресация)
 // =============================================
-TEST(HashTableUsedArrayTest, BasicInsertFind) {
+
+TEST(HashTableUsedArrayTest, InsertAndFindBasic) {
     HashTableUsedArray<int, int> table(10, 1);
     EXPECT_TRUE(table.Insert({ 1, 10 }));
     EXPECT_TRUE(table.Insert({ 2, 20 }));
-
     EXPECT_TRUE(table.Find(1));
     EXPECT_EQ(table.getCurrVal(), 10);
     EXPECT_TRUE(table.Find(2));
@@ -220,16 +220,11 @@ TEST(HashTableUsedArrayTest, BasicInsertFind) {
 
 TEST(HashTableUsedArrayTest, CollisionResolution) {
     HashTableUsedArray<int, int> table(10, 1);
-    // Ключи с одинаковым хешем
-    int key1 = 0;
-    int key2 = 10;
-
-    EXPECT_TRUE(table.Insert({ key1, 100 }));
-    EXPECT_TRUE(table.Insert({ key2, 200 }));
-
-    EXPECT_TRUE(table.Find(key1));
+    EXPECT_TRUE(table.Insert({ 0, 100 }));   // Хэш 0
+    EXPECT_TRUE(table.Insert({ 10, 200 }));  // Хэш 0 -> коллизия
+    EXPECT_TRUE(table.Find(0));
     EXPECT_EQ(table.getCurrVal(), 100);
-    EXPECT_TRUE(table.Find(key2));
+    EXPECT_TRUE(table.Find(10));
     EXPECT_EQ(table.getCurrVal(), 200);
 }
 
@@ -245,19 +240,67 @@ TEST(HashTableUsedArrayTest, DeleteAndReinsert) {
     EXPECT_EQ(table.getCurrVal(), 30);
 }
 
-TEST(HashTableUsedArrayTest, FullTable) {
+TEST(HashTableUsedArrayTest, FullTableBehavior) {
     HashTableUsedArray<int, int> table(3, 1);
-    table.Insert({ 1, 10 });
-    table.Insert({ 2, 20 });
-    table.Insert({ 3, 30 });
+    EXPECT_TRUE(table.Insert({ 1, 10 }));
+    EXPECT_TRUE(table.Insert({ 2, 20 }));
+    EXPECT_TRUE(table.Insert({ 3, 30 }));
 
     EXPECT_FALSE(table.Insert({ 4, 40 }));
     EXPECT_TRUE(table.IsFull());
 }
 
+
+TEST(HashTableUsedArrayTest, EfficiencyWithClusters) {
+    HashTableUsedArray<int, int> table(100, 1);
+    table.Insert({ 2, 100 });
+    table.Insert({ 102, 200 });
+    table.Insert({ 202, 300 });
+
+    int base_eff = table.getEff();
+    table.Find(2);
+    EXPECT_EQ(table.getEff() - base_eff, 1);  // Первый элемент
+
+    base_eff = table.getEff();
+    table.Find(102);
+    EXPECT_EQ(table.getEff() - base_eff, 2);  // Второй элемент
+
+    base_eff = table.getEff();
+    table.Find(202);
+    EXPECT_EQ(table.getEff() - base_eff, 3);  // Третий элемент
+}
+
+TEST(HashTableUsedArrayTest, StepSizeEffectiveness) {
+    HashTableUsedArray<int, int> table(100, 5);
+    table.Insert({ 5, 100 });
+    table.Insert({ 105, 200 });
+    table.Insert({ 205, 300 });
+
+    int base_eff = table.getEff();
+    table.Find(5);
+    EXPECT_EQ(table.getEff() - base_eff, 1);
+
+    base_eff = table.getEff();
+    table.Find(105);
+    EXPECT_EQ(table.getEff() - base_eff, 2);  // Шаг 5
+}
+
+TEST(HashTableUsedArrayTest, DeletedSlotReuse) {
+    HashTableUsedArray<int, int> table(10, 1);
+    table.Insert({ 1, 10 });
+    table.Insert({ 11, 20 });  // Коллизия
+    table.Delete(1);
+
+    // Вставка в освободившийся слот
+    EXPECT_TRUE(table.Insert({ 21, 30 }));  // Должен занять слот 1
+    EXPECT_TRUE(table.Find(21));
+    EXPECT_EQ(table.getCurrVal(), 30);
+}
+
 // =============================================
-// Тесты для класса HashTableUsedList
+// Тесты для HashTableUsedList (метод цепочек)
 // =============================================
+
 TEST(HashTableUsedListTest, BasicOperations) {
     HashTableUsedList<int, int> table(10);
     EXPECT_TRUE(table.Insert({ 1, 10 }));
@@ -271,27 +314,100 @@ TEST(HashTableUsedListTest, BasicOperations) {
 
 TEST(HashTableUsedListTest, CollisionHandling) {
     HashTableUsedList<int, int> table(10);
-    // Ключи с одинаковым хешем
-    int key1 = 0;
-    int key2 = 10;
+    table.Insert({ 0, 100 });
+    table.Insert({ 10, 200 });  // Коллизия
+    table.Insert({ 20, 300 });  // Коллизия
 
-    EXPECT_TRUE(table.Insert({ key1, 100 }));
-    EXPECT_TRUE(table.Insert({ key2, 200 }));
-
-    EXPECT_TRUE(table.Find(key1));
+    EXPECT_TRUE(table.Find(0));
     EXPECT_EQ(table.getCurrVal(), 100);
-    EXPECT_TRUE(table.Find(key2));
+    EXPECT_TRUE(table.Find(10));
     EXPECT_EQ(table.getCurrVal(), 200);
+    EXPECT_TRUE(table.Find(20));
+    EXPECT_EQ(table.getCurrVal(), 300);
 }
 
-TEST(HashTableUsedListTest, DeleteFromList) {
+TEST(HashTableUsedListTest, DeleteFromChain) {
     HashTableUsedList<int, int> table(10);
     table.Insert({ 1, 10 });
-    table.Insert({ 11, 110 }); // Коллизия
+    table.Insert({ 11, 20 });  // Коллизия
+    table.Insert({ 21, 30 });  // Коллизия
 
-    table.Delete(1);
-    EXPECT_FALSE(table.Find(1));
-    EXPECT_TRUE(table.Find(11));
+    table.Delete(11);
+    EXPECT_FALSE(table.Find(11));
+    EXPECT_TRUE(table.Find(1));
+    EXPECT_TRUE(table.Find(21));
+}
+
+TEST(HashTableUsedListTest, EfficiencyInChains) {
+    HashTableUsedList<int, int> table(100);
+    // Все элементы в одной корзине
+    table.Insert({ 5, 100 });
+    table.Insert({ 105, 200 });
+    table.Insert({ 205, 300 });
+    int effall = table.getEff();
+    // Проверка эффективности поиска
+    table.Find(5);    // 1-й в цепочке
+    int eff5 = table.getEff() - effall;
+    table.Find(105);  // 2-й в цепочке
+    int eff105 = table.getEff() - effall - eff5;
+    table.Find(205);  // 3-й в цепочке
+    int eff205 = table.getEff() - effall - eff105 - eff5;
+
+    EXPECT_EQ(eff5, 4);
+    EXPECT_EQ(eff105, 3);
+    EXPECT_EQ(eff205, 2);
+}
+
+TEST(HashTableUsedListTest, IteratorFunctionality) {
+    HashTableUsedList<int, int> table(10);
+    table.Insert({ 1, 10 });
+    table.Insert({ 11, 20 });
+    table.Insert({ 2, 30 });
+
+    std::set<int> keys;
+    table.Reset();
+    while (!table.IsEnd()) {
+        keys.insert(table.getCurrKey());
+        table.GoNext();
+    }
+
+    EXPECT_EQ(keys.size(), 3);
+    EXPECT_TRUE(keys.find(1) != keys.end());
+    EXPECT_TRUE(keys.find(11) != keys.end());
+    EXPECT_TRUE(keys.find(2) != keys.end());
+}
+
+TEST(HashTableUsedListTest, LargeNumberOfCollisions) {
+    HashTableUsedList<int, int> table(10);
+    const int N = 100;
+
+    // Все элементы в одной корзине
+    for (int i = 0; i < N; i++) {
+        EXPECT_TRUE(table.Insert({ i * 10, i * 100 }));
+    }
+
+    // Проверка последнего элемента
+    EXPECT_TRUE(table.Find((N - 1) * 10));
+    EXPECT_EQ(table.getCurrVal(), (N - 1) * 100);
+
+    // Проверка эффективности
+    EXPECT_GT(table.getEff(), N);  // Каждый поиск в длинной цепочке
+}
+
+TEST(HashTableUsedListTest, MixedOperations) {
+    HashTableUsedList<int, int> table(10);
+    table.Insert({ 1, 10 });
+    table.Insert({ 2, 20 });
+    table.Insert({ 3, 30 });
+
+    table.Delete(2);
+    EXPECT_FALSE(table.Find(2));
+
+    table.Insert({ 12, 120 });  // Коллизия с 2
+    EXPECT_TRUE(table.Find(12));
+
+    table.Insert({ 2, 200 });  // Повторная вставка
+    EXPECT_TRUE(table.Find(2));
 }
 
 // =============================================
