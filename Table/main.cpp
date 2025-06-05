@@ -208,7 +208,7 @@ int main() {
     TTNode::PrintFree();
 
     std::cout << "\nВставка нового значения 85\n\n";
-    tree.InsertElement(85);
+    tree.InsertElement(99);
     TTNode::PrintFree();
 
     std::cout << "\nФинальная структура дерева:\n";
