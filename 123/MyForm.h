@@ -586,8 +586,6 @@ private: System::Void button5_Click(System::Object^ sender, System::EventArgs^ e
 
 			// Прокручиваем DataGridView к выбранной строке
 			dataGridView1->FirstDisplayedScrollingRowIndex = index;
-			DisplayRecordsInGrid();
-			UpdateLabel7();
 		}
 		else {
 			MessageBox::Show("Элемент с таким ключом не найден");
@@ -596,7 +594,8 @@ private: System::Void button5_Click(System::Object^ sender, System::EventArgs^ e
 	catch (...) {
 		MessageBox::Show("Ошибка при поиске");
 	}
-
+	DisplayRecordsInGrid();
+	UpdateLabel7();
 	// Очистка поля поиска
 	textBox1->Clear();
 }

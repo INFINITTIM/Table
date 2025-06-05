@@ -645,8 +645,6 @@ namespace CppWinForm1 {
 
                 if (found) {
                     foundNodeKey = key; // Запоминаем найденный ключ
-                    UpdateTreeView();   // Обновляем отображение с подсветкой
-                    UpdateEfficiency();
                     MessageBox::Show("Узел с ключом " + key + " найден!");
                 }
                 else {
@@ -661,6 +659,8 @@ namespace CppWinForm1 {
             catch (...) {
                 MessageBox::Show("Неизвестная ошибка при поиске узла!");
             }
+            UpdateTreeView();
+            UpdateEfficiency();
         }
     };
 }
