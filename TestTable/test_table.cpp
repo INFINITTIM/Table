@@ -515,7 +515,7 @@ TEST(TreeBalanceTest, InsertAndBalance) {
     TreeBalance<int, int> tree;
     tree.Insert({ 10, 100 });
     tree.Insert({ 20, 200 });
-    tree.Insert({ 30, 300 }); // Should trigger rotation
+    tree.Insert({ 30, 300 }); 
 
     // Check structure
     tree.Reset();
@@ -547,15 +547,13 @@ TEST(TreeBalanceTest, DeleteAndBalance) {
 
 TEST(TreeBalanceTest, ComplexInsertSequence) {
     TreeBalance<int, int> tree;
-    // Insert sequence that causes multiple rotations
     tree.Insert({ 30, 300 });
     tree.Insert({ 20, 200 });
-    tree.Insert({ 10, 100 }); // LL rotation
+    tree.Insert({ 10, 100 });
     tree.Insert({ 25, 250 });
     tree.Insert({ 5, 50 });
     tree.Insert({ 15, 150 });
 
-    // Expected in-order: 5,10,15,20,25,30
     std::vector<int> keys;
     for (tree.Reset(); !tree.IsEnd(); tree.GoNext()) {
         keys.push_back(tree.getCurrKey());
@@ -577,20 +575,59 @@ TEST(TreeBalanceTest, ComplexDeleteSequence) {
     tree.Delete(20);
     tree.Delete(40);
 
-    // Check remaining elements
     EXPECT_TRUE(tree.Find(10));
     EXPECT_TRUE(tree.Find(25));
     EXPECT_TRUE(tree.Find(30));
     EXPECT_TRUE(tree.Find(35));
     EXPECT_TRUE(tree.Find(50));
 
-    // Check in-order sequence
     std::vector<int> keys;
     for (tree.Reset(); !tree.IsEnd(); tree.GoNext()) {
         keys.push_back(tree.getCurrKey());
     }
 
     EXPECT_EQ(keys, std::vector<int>({ 10, 25, 30, 35, 50 }));
+}
+
+TEST(TreeBalanceTest, SequentialInsertAndBalancedEfficiency) {
+    TreeBalance<int, int> tree;
+    const int N = 1000;
+
+    // Вставка последовательных элементов
+    for (int i = 1; i <= N; i++) {
+        tree.Insert({ i, i * 10 });
+    }
+
+    // Проверка размера
+    EXPECT_EQ(tree.getDataCount(), N);
+
+    // Теоретическая высота AVL-дерева с 1000 элементами
+    const int expectedHeight = 10;
+
+    // Проверка эффективности поиска
+    tree.ClearEff();
+    tree.Find(512);  // Корень дерева
+    EXPECT_EQ(tree.getEff(), 1);
+
+    tree.ClearEff();
+    tree.Find(256);  // Левый потомок корня
+    EXPECT_EQ(tree.getEff(), 2);
+
+    tree.ClearEff();
+    tree.Find(768);  // Правый потомок корня
+    EXPECT_EQ(tree.getEff(), 2);
+
+    tree.ClearEff();
+    tree.Find(1);    // Минимальный элемент (левый лист)
+    EXPECT_EQ(tree.getEff(), expectedHeight);
+
+    tree.ClearEff();
+    tree.Find(1000); // Максимальный элемент (правый лист)
+    EXPECT_EQ(tree.getEff(), expectedHeight);
+
+    tree.ClearEff();
+    tree.Find(512);  // Повторный поиск корня (должен быть в кэше)
+    EXPECT_EQ(tree.getEff(), 1);
 }
 
 // =============================================
@@ -618,7 +655,6 @@ TEST(PerformanceTest, LargeSortTableFind) {
 
 TEST(PerformanceTest, TreeTableBalancedInsert) {
     TreeTable<int, int> tree;
-    // Insert in balanced way
     tree.Insert({ 500, 5000 });
     for (int i = 0; i < 500; i++) {
         tree.Insert({ i, i * 10 });
@@ -670,7 +706,7 @@ TEST(EfficiencyTest, SortTableEfficiency) {
 
     table.ClearEff();
     table.Find(500);
-    EXPECT_LT(table.getEff(), 15); // O(log n) efficiency
+    EXPECT_LT(table.getEff(), 15); // O(log n) 
 }
 
 TEST(EfficiencyTest, HashTableEfficiency) {
@@ -681,5 +717,5 @@ TEST(EfficiencyTest, HashTableEfficiency) {
 
     table.ClearEff();
     table.Find(500);
-    EXPECT_LT(table.getEff(), 5); // O(1) average case
+    EXPECT_LT(table.getEff(), 5); // O(1) 
 }

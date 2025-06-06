@@ -104,33 +104,6 @@ void SortTable<TKey, TVal>::Delete(TKey key) {
 	}
 }
 
-
-/*template <typename TKey, typename TVal>
-void SortTable<TKey, TVal>::SelectSort() // сортировка выбором 
-{
-	int i = 0, j = 0;
-	while (i < DataCount)
-	{
-		int k;
-		j = i;
-		int min_i = pRec[i].key;
-		while (j < DataCount)
-		{
-			Eff++;
-			if (min_i < pRec[j].key)
-			{
-				min_i = pRec[j].key;
-				k = j;
-			}
-			j++;
-		}
-		Record<TKey, TVal> rec = pRec[k];
-		pRec[k] = pRec[i];
-		pRec[i] = rec;
-	}
-	i++;
-}*/
-
 template <typename TKey, typename TVal>
 void SortTable<TKey, TVal>::SelectSort()
 {
@@ -173,31 +146,6 @@ void SortTable<TKey, TVal>::QuickSort() // быстрая сортировка
 	QuickSortRec(0, DataCount - 1); //рекурсивная сортировка
 }
 
-/*template <typename TKey, typename TVal>
-void SortTable<TKey, TVal>::QuickSortRec(int start, int finish) // рекурсивная быстрая сортировка 
-{
-	int left = start;
-	int right = finish;
-	Record<TKey, TVal> k = pRec[(start + finish) / 2];
-	while (left < right)
-	{
-		while (pRec[left] < k)
-			left++;
-		while (pRec[right] > k)
-			right--;
-		if (left <= right)
-		{
-			swap(pRec[left], pRec[right]);
-			left++;
-			right--;
-		}
-	}
-	if (start < left)
-		QuickSortRec(start, left);
-	if (right < finish)
-		QuickSortRec(right, finish);
-}*/
-
 template <typename TKey, typename TVal>
 void SortTable<TKey, TVal>::QuickSortRec(int start, int finish)
 {
@@ -231,52 +179,6 @@ void SortTable<TKey, TVal>::QuickSortRec(int start, int finish)
 	if (left < finish)
 		QuickSortRec(left, finish);
 }
-
-//в классе сорт тейбл помимо массива прекорд нужно объявить еще и временный массив для складирования записей при сортировке
-
-/*template <typename TKey, typename TVal>
-void SortTable<TKey, TVal>::Merge(int left, int middle, int right)
-{
-	int i = left;
-	int k = left;
-	int j = middle + 1;
-	while (i <= middle && j <= right)
-	{
-		if (pRec[i].key <= pRec[j].key)
-			pTmp[k] = pRec[i]; i++;
-		else
-			pTmp[k] = pRec[j]; j++; k++;
-	}
-	if (i <= middle)
-		while (i <= middle)
-		{
-			pTmp[k] = pRec[i];
-			i++;
-			j++;
-		}
-	else
-		while (j <= right)
-		{
-			pTmp[k] = pRec[j];
-			j++;
-			k++;
-		}
-	for (int i = left; i <= right; i++)
-	{
-		pRec[i] = pTmp[i];
-	}
-}
-
-template <typename TKey, typename TVal>
-void SortTable<TKey, TVal>::MergeSort(int left, int right)
-{
-	if (left == right)
-		return;
-	int middle = (left + right) / 2;
-	MergeSort(left, middle);
-	MergeSort(middle + 1; right);
-	Merge(left, middle, right);
-}*/
 
 template <typename TKey, typename TVal>
 void SortTable<TKey, TVal>::Merge(int left, int middle, int right)
@@ -335,8 +237,4 @@ void SortTable<TKey, TVal>::MergeSort(int left, int right)
 
 // отличие от быстрой в том что она расходует доп память а то есть в два раза больше но трудоемкость всегда одинаковая NlogN;
 
-// задание сделать неупорядоченную таблицу и отсортировать ее с помощью этих сортировок
-
-// создание упорядоченной таблицы двумя способами 
-// создание таблицы через инсёрты или берем неупорядоченную таблицу берем все элементы и сортируем
 

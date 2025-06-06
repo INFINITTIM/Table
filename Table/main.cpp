@@ -89,23 +89,6 @@ public:
             return;
         table->Insert(Record<int, int>{i, j});
     }
-    /*void FillRandom(int count, int maxKey)
-    {
-        // Инициализация генератора случайных чисел
-        std::srand(std::time(nullptr));
-
-        for (int i = 0; i < count; i++)
-        {
-            // Генерация случайного ключа от 1 до maxKey
-            int randomKey = 1 + (std::rand() % maxKey);
-            // Значение можно сделать таким же как ключ или другое - здесь оставляем 5 как в примере
-            //Insert(randomKey, 5);
-            table->Insert(Record<int, int>{randomKey, 5});
-            if (table->Insert(Record<int, int>{randomKey, 5}) == false)
-            {
-            }
-        }
-    }*/
 
     void FillRandom(int count, int maxKey)
     {
